@@ -1,17 +1,17 @@
-var configAuth = require('./../config/auth.js');
+// var configAuth = require('./../config/auth.js');
 var date = new Date();
 
 module.exports = {
 
     'WebAuthenticationDetail': {
         'UserCredential': {
-            'Key': configAuth.key, //Your Key given by FedEx
-            'Password': configAuth.password //Your Password given by FedEx
+            'Key': 'F0ouceONkWNsFHPX', //Your Key given by FedEx
+            'Password': 'gbfVv8FZnA75CBXVhexPTLwbf' //Your Password given by FedEx
         }
     },
     'ClientDetail': {
-        AccountNumber: configAuth.accountNumber, //Your Account Number given by FedEx
-        MeterNumber: configAuth.meterNumber //Your Meter Number given by FedEx
+        'AccountNumber': '260817302', //Your Account Number given by FedEx
+        'MeterNumber' : '251823183' //Your Meter Number given by FedEx
     },
     'Version': {
         'ServiceId': 'crs',
@@ -23,10 +23,10 @@ module.exports = {
     'RequestedShipment': {
         'ShipTimestamp': new Date(date.getTime() + (24*60*60*1000)).toISOString(),
         'DropoffType': 'REGULAR_PICKUP',
-        'ServiceType': 'STANDARD_OVERNIGHT',
+        'ServiceType': 'INTERNATIONAL_ECONOMY_FREIGHT',
         'PackagingType': 'YOUR_PACKAGING',
         'TotalWeight': {
-            'Units': 'LB',
+            'Units': 'KG',
             'Value': "10"
         },
         'Shipper': {
@@ -38,10 +38,10 @@ module.exports = {
                 'StreetLines': [
                 'Address Line 1'
                 ],
-                'City': 'Collierville',
-                'StateOrProvinceCode': 'TN',
-                'PostalCode': '38017',
-                'CountryCode': 'US'
+                'City': 'Dubai',
+                'StateOrProvinceCode': '',
+                'PostalCode': '',
+                'CountryCode': 'AE'
             }
         },
         'Recipient': {
@@ -53,17 +53,17 @@ module.exports = {
                 'StreetLines': [
                 'Address Line 1'
                 ],
-                'City': 'Charlotte',
-                'StateOrProvinceCode': 'NC',
-                'PostalCode': '28202',
-                'CountryCode': 'US'
+                'City': 'Jeddah',
+                'StateOrProvinceCode': '',
+                'PostalCode': '',
+                'CountryCode': 'SA'
             }
         },
         'ShippingChargesPayment': {
             'PaymentType': 'SENDER',
             'Payor': {
                 'ResponsibleParty': {
-                    'AccountNumber': configAuth.accountNumber //Your Account Number given by FedEx
+                    'AccountNumber': '260817302' //Your Account Number given by FedEx
                 }
             }
         },
@@ -72,8 +72,8 @@ module.exports = {
         'RequestedPackageLineItems': {
             'GroupPackageCount': 1,
             'Weight': {
-                'Units': 'LB',
-                'Value': "10"
+                'Units': 'KG',
+                'Value': "100"
             },
             'Dimensions': {
                 'Length': "4",
