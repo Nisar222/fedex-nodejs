@@ -5,13 +5,13 @@ module.exports = {
 
     'WebAuthenticationDetail': {
         'UserCredential': {
-            'Key': 'F0ouceONkWNsFHPX', //Your Key given by FedEx
-            'Password': 'gbfVv8FZnA75CBXVhexPTLwbf' //Your Password given by FedEx
+            'Key': '', //Your Key given by FedEx
+            'Password': '' //Your Password given by FedEx
         }
     },
     'ClientDetail': {
-        'AccountNumber': '260817302', //Your Account Number given by FedEx
-        'MeterNumber' : '251823183' //Your Meter Number given by FedEx
+        'AccountNumber': '', //Your Account Number given by FedEx
+        'MeterNumber' : '' //Your Meter Number given by FedEx
     },
     'Version': {
         'ServiceId': 'crs',
