@@ -2,14 +2,19 @@ var express = require('express');
 var app = express();
 var path = require('path');
 var port = process.env.PORT || 8080;
+var captureRequest = '';
+var fs = require('fs');
+var outputvalues = '';
 
 var soap = require('soap');
 
 var url = path.join(__dirname, 'wsdl', 'RateService_v20.wsdl');
 var params = require('./params/rateRequest.js');
-var arr = require('./tarray.js');
+var arr = require('./badarray.js');
 const { resolve } = require('path');
 const { rejects } = require('assert');
+const { findIndex } = require('./array.js');
+const { resolveCname } = require('dns');
 var ODPair = { Origin: "AE", Destination: "SA", Origin_City: "Dubai", Dest_City: "Jeddah" };
 var service = { IP: "INTERNATIONAL_PRIORITY", IE: "INTERNATIONAL_ECONOMY", IPF: "INTERNATIONAL_PRIORITY_FREIGHT", IEF: "INTERNATIONAL_ECONOMY_FREIGHT" }
 
@@ -40,28 +45,36 @@ app.get('/rate', function (req, res) {
 app.get('/rates', function (req, res) {
     const arrOfPromises = arr.map(item => {
         return new Promise((resolve, reject) => {
-            const params1 = setODPair(params, item.Orig, item.Dest, item.Origin_City, item.Dest_City);
+            const params1 = setODPair(params, item.Orig, item.Dest, item.Origin_City, item.Dest_City, ODPairval);
+            outputvalues = item.Orig + "," + item.Dest + "," + item.Origin_City + "," + item.Dest_City + ",";
+         
             soap.createClient(url, (err, client) => {
                 if (err) {
                     reject(err);
                 } else {
                     client.getRates(params1, (err, result) => {
-                        if  (err) {
+                        if (err) {
                             reject(err);
                         } else if (result.RateReplyDetails) {
-                            resolve(result.RateReplyDetails[0].CommitDetails[0].CommitTimestamp);
+                            resolve(result.RateReplyDetails[0].CommitDetails[0].CommitTimestamp + "\n");
                         } else {
-                            resolve(result)
+                            reject(result);
                         }
                     });
-                }
+                };
             });
         })
     });
 
     Promise.allSettled(arrOfPromises).then(allRes => {
         res.send(allRes);
-    }).catch(err => res.status(500).send(err))
+    }).catch(err => res.status(500).send(err));
+    fs.appendFile('./response.json', JSON.stringify(allRes), function (err, data) {
+        if (err) {
+            return console.log(err);
+        }
+        console.log(data);
+    });
 });
 
 
@@ -71,9 +84,13 @@ app.listen(port, function () {
 
 function setService(trans, svc) {
     if ((svc === "INTERNATIONAL_PRIORITY_FREIGHT" || "INTERNATIONAL_ECONOMY_FREIGHT")) {
-        trans.RequestedShipment.TotalWeight.Value = '100';
-    } else {
         trans.RequestedShipment.TotalWeight.Value = '10';
+        trans.RequestedShipment.RequestedPackageLineItems.Weight.Units = 'KG';
+        trans.RequestedShipment.RequestedPackageLineItems.Weight.Value = '10';
+    } else {
+        trans.RequestedShipment.TotalWeight.Value = '100';
+        trans.RequestedShipment.RequestedPackageLineItems.Weight.Units = 'KG';
+        trans.RequestedShipment.RequestedPackageLineItems.Weight.Value = '100';
     }
 
     trans.RequestedShipment.ServiceType = svc;
@@ -83,10 +100,197 @@ function setService(trans, svc) {
 
 
 
-function setODPair(trans, Origin, Dest, O_City, D_City) {
+function setODPair(trans, Origin, Dest, O_City, D_City, srvc, ODPairval) {
     trans.RequestedShipment.Recipient.Address.City = D_City;
     trans.RequestedShipment.Recipient.Address.CountryCode = Dest;
     trans.RequestedShipment.Shipper.Address.City = O_City;
     trans.RequestedShipment.Shipper.Address.CountryCode = Origin;
+    trans.TransactionDetail.CustomerTransactionId = ODPairval;
+    setService(trans, srvc);
     return trans;
 }
+
+
+
+
+
+
+//----------------------------
+
+app.get('/IPrates', function (req, res) {
+    const arrOfPromises = arr.map(item => {
+        return new Promise((resolve, reject) => {
+            var srvc = 'INTERNATIONAL_PRIORITY';
+            const params1 = setODPair(params, item.Orig, item.Dest, item.Origin_City, item.Dest_City, srvc, item.ODPair);
+            // console.log(allRes);   
+                        // write request transaction details to file
+                        // outputvalues = item.Orig + "," + item.Dest + "," + item.Origin_City + "," + item.Dest_City + ",";
+
+                        // fs.appendFile('./response.json', JSON.stringify(outputvalues), function (err, data) {
+                        //     if (err) {
+                        //         return console.log(err);
+                        //     }
+                        //     console.log(data);
+                        // });           
+            soap.createClient(url, (err, client) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    client.getRates(params1, (err, result) => {
+                        if (err) {
+                            reject(err);
+                        } else if (result.RateReplyDetails) {
+                            if(result.RateReplyDetails[0].CommitDetails[0].CommitTimestamp == 'undefined') 
+                            {
+                                reject("Commit Not Available");
+                            } else
+                                {  
+                                resolve(result.TransactionDetail.CustomerTransactionId + " + " + result.RateReplyDetails[0].DeliveryStation + result.RateReplyDetails[0].CommitDetails[0].CommitTimestamp + "\n");
+                                 
+                                //write result to file  
+                                    fs.appendFile('./response.json', JSON.stringify(outputvalues), function (err, data) {
+                                        if (err) {
+                                            return console.log(err);
+                                        }
+                                        console.log(data);
+                                    });
+                            }
+                        } else {
+                            reject(result);
+                        }
+                    });
+                }   
+            });
+        });
+    });
+    Promise.allSettled(arrOfPromises).then(allRes => {
+        res.send(allRes);
+        
+        fs.appendFile('./response.json', JSON.stringify(allRes), function (err, data) {
+            if (err) {
+                return console.log(err);
+            }
+            // console.log(allRes);
+        });
+    }).catch(err => res.status(500).send(err));
+
+});
+
+
+//-------------IPF Rates---------------------//
+
+app.get('/IPFrates', function (req, res) {
+    const arrOfPromises = arr.map(item => {
+        return new Promise((resolve, reject) => {
+            var srvc = 'INTERNATIONAL_PRIORITY_FREIGHT';
+            const params1 = setODPair(params, item.Orig, item.Dest, item.Origin_City, item.Dest_City, srvc, item.ODPair);
+            // console.log(allRes);              
+            soap.createClient(url, (err, client) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    client.getRates(params1, (err, result) => {
+                        if (err) {
+                            console.log(result);
+                            reject(err);
+                        } else if (result.RateReplyDetails) {
+                            console.log(result);
+                            resolve(result.TransactionDetail.CustomerTransactionId + " + " + result.RateReplyDetails[0].CommitDetails[0].CommitTimestamp);
+                        } else {
+                            reject(result);
+                        }
+                    });
+                }
+            });
+        });
+    });
+    Promise.allSettled(arrOfPromises).then(allRes => {
+        res.send(allRes);
+        fs.appendFile('./response.json', JSON.stringify(allRes), function (err, data) {
+            if (err) {
+                return console.log(err);
+            }
+            // console.log(allRes);
+        });
+    }).catch(err => res.status(500).send(err));
+
+});
+
+
+
+//-------------IE Rates---------------------//
+
+app.get('/IErates', function (req, res) {
+    const arrOfPromises = arr.map(item => {
+        return new Promise((resolve, reject) => {
+            var srvc = 'INTERNATIONAL_ECONOMY';
+            const params1 = setODPair(params, item.Orig, item.Dest, item.Origin_City, item.Dest_City, srvc, item.ODPair);
+            // console.log(allRes);              
+            soap.createClient(url, (err, client) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    client.getRates(params1, (err, result) => {
+                        if (err) {
+                            console.log(result);
+                            reject(err);
+                        } else if (result.RateReplyDetails) {
+                            resolve(result.TransactionDetail.CustomerTransactionId + " + " + result.RateReplyDetails[0].CommitDetails[0].CommitTimestamp);
+                        } else {
+                            reject(result);
+                        }
+                    });
+                }
+            });
+        });
+    });
+    Promise.allSettled(arrOfPromises).then(allRes => {
+        res.send(allRes);
+        fs.appendFile('./response.json', JSON.stringify(allRes), function (err, data) {
+            if (err) {
+                return console.log(err);
+            }
+            // console.log(allRes);
+        });
+    }).catch(err => res.status(500).send(err));
+
+});
+
+
+//-------------IEF Rates---------------------//
+
+app.get('/IEFrates', function (req, res) {
+    const arrOfPromises = arr.map(item => {
+        return new Promise((resolve, reject) => {
+            var srvc = 'INTERNATIONAL_ECONOMY_FREIGHT';
+            const params1 = setODPair(params, item.Orig, item.Dest, item.Origin_City, item.Dest_City, srvc, item.ODPair);
+            // console.log(allRes);              
+            soap.createClient(url, (err, client) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    client.getRates(params1, (err, result) => {
+                        if (err) {
+                            console.log(result);
+                            reject(err);
+                        } else if (result.RateReplyDetails) {
+                            resolve(result.TransactionDetail.CustomerTransactionId + " + " + result.RateReplyDetails[0].CommitDetails[0].CommitTimestamp);
+                        } else {
+                            reject(result);
+                        }
+                    });
+                }
+            });
+        });
+    });
+    Promise.allSettled(arrOfPromises).then(allRes => {
+        res.send(allRes);
+        fs.appendFile('./response.json', JSON.stringify(allRes), function (err, data) {
+            if (err) {
+                return console.log(err);
+            }
+            // console.log(allRes);
+        });
+    }).catch(err => res.status(500).send(err));
+
+});

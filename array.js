@@ -56,13 +56,6 @@ module.exports = [
     'Dest_City': 'Jeddah'
   },
   {
-    'ODPair': 'BW ZA',
-    'Orig': 'BW',
-    'Dest': 'ZA',
-    'Origin_City': 'Gaborone',
-    'Dest_City': 'Johannesberg'
-  },
-  {
     'ODPair': 'JO AE',
     'Orig': 'JO',
     'Dest': 'AE',
@@ -77,20 +70,6 @@ module.exports = [
     'Dest_City': 'Dubai'
   },
   {
-    'ODPair': 'LS ZA',
-    'Orig': 'LS',
-    'Dest': 'ZA',
-    'Origin_City': 'Maseru',
-    'Dest_City': 'Johannesberg'
-  },
-  {
-    'ODPair': 'NA ZA',
-    'Orig': 'NA',
-    'Dest': 'ZA',
-    'Origin_City': 'Windhoek',
-    'Dest_City': 'Johannesbeg'
-  },
-  {
     'ODPair': 'OM AE',
     'Orig': 'OM',
     'Dest': 'AE',
@@ -103,46 +82,6 @@ module.exports = [
     'Dest': 'BH',
     'Origin_City': 'Jeddah',
     'Dest_City': 'Manama'
-  },
-  {
-    'ODPair': 'SZ ZA',
-    'Orig': 'SZ',
-    'Dest': 'ZA',
-    'Origin_City': 'Dubai',
-    'Dest_City': 'Johannesberg'
-  },
-  {
-    'ODPair': 'ZA SZ',
-    'Orig': 'ZA',
-    'Dest': 'SZ',
-    'Origin_City': 'Johannesberg',
-    'Dest_City': 'Lobamba'
-  },
-  {
-    'ODPair': 'ZA BW',
-    'Orig': 'ZA',
-    'Dest': 'BW',
-    'Origin_City': 'Johannesberg',
-    'Dest_City': 'Gaborone'
-  },
-  {
-    'ODPair': 'ZA LS',
-    'Orig': 'ZA',
-    'Dest': 'LS',
-    'Origin_City': 'Johannesberg',
-    'Dest_City': 'Maseru'
-  },
-  {
-    'ODPair': 'ZA NA',
-    'Orig': 'ZA',
-    'Dest': 'NA',
-    'Origin_City': 'Johannesberg',
-    'Dest_City': 'Windhoek'
   }
 ];
 
-/*
-Object.keys(arr).forEach(function(key) {
-  console.log(key, arr[key].ODPair, arr[key].Origin_City);
-});
-*/
