@@ -11,7 +11,10 @@ module.exports = {
     },
     'ClientDetail': {
         'AccountNumber': '', //Your Account Number given by FedEx
-        'MeterNumber' : '' //Your Meter Number given by FedEx
+        'MeterNumber' : '251823183' //Your Meter Number given by FedEx
+    },
+    'TransactionDetail': {
+        'CustomerTransactionId': '', //Your Unique Transactional ID
     },
     'Version': {
         'ServiceId': 'crs',
@@ -23,7 +26,7 @@ module.exports = {
     'RequestedShipment': {
         'ShipTimestamp': new Date(date.getTime() + (24*60*60*1000)).toISOString(),
         'DropoffType': 'REGULAR_PICKUP',
-        'ServiceType': 'INTERNATIONAL_ECONOMY_FREIGHT',
+        'ServiceType': 'INTERNATIONAL_PRIORITY',
         'PackagingType': 'YOUR_PACKAGING',
         'TotalWeight': {
             'Units': 'KG',

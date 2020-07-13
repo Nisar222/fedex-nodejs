@@ -29,8 +29,8 @@ app.get('/describe', function (req, res) {
 });
 
 app.get('/rate', function (req, res) {
-    params = setODPair(params, "AE", "SA");
-    params = setService(params, service.IEF);
+    params = setODPair(params, "AE", "SA", "Dubai","Jeddah", "AE SA");
+    params = setService(params, service.IP);
     soap.createClient(url, function (err, client) {
         client.getRates(params, function (err, result) {
             // res.json(result.RateReplyDetails[0].CommitDetails[0].CommitTimestamp);
@@ -45,9 +45,7 @@ app.get('/rate', function (req, res) {
 app.get('/rates', function (req, res) {
     const arrOfPromises = arr.map(item => {
         return new Promise((resolve, reject) => {
-            const params1 = setODPair(params, item.Orig, item.Dest, item.Origin_City, item.Dest_City, ODPairval);
-            outputvalues = item.Orig + "," + item.Dest + "," + item.Origin_City + "," + item.Dest_City + ",";
-         
+            const params1 = setODPair(params, item.Orig, item.Dest, item.Origin_City, item.Dest_City);         
             soap.createClient(url, (err, client) => {
                 if (err) {
                     reject(err);
@@ -56,25 +54,40 @@ app.get('/rates', function (req, res) {
                         if (err) {
                             reject(err);
                         } else if (result.RateReplyDetails) {
-                            resolve(result.RateReplyDetails[0].CommitDetails[0].CommitTimestamp + "\n");
+                            resolve(result.RateReplyDetails[0].CommitDetails[0].CommitTimestamp);
+                            // console.log(arr);
+                            // I need to write to the original Object with teh result
                         } else {
                             reject(result);
                         }
                     });
-                };
+                }
             });
-        })
+        });
     });
 
+          
     Promise.allSettled(arrOfPromises).then(allRes => {
         res.send(allRes);
-    }).catch(err => res.status(500).send(err));
-    fs.appendFile('./response.json', JSON.stringify(allRes), function (err, data) {
-        if (err) {
-            return console.log(err);
-        }
-        console.log(data);
-    });
+        allRes.forEach(element => {
+            fs.appendFile('./response.json', JSON.stringify(element.value, null, 2), function (err, data) {
+                if (err) {
+                    return console.log(err);
+                }
+                console.log(data);
+            });           
+        }); 
+    }).catch(err => console.log(err));
+    
+    // Promise.allSettled(arrOfPromises).then(allRes => {
+    //     res.send(allRes);
+    //     fs.appendFile('./response.json', JSON.stringify(allRes, null, 2), function (err, data) {
+    //         if (err) {
+    //             return console.log(err);
+    //         }
+    //         console.log(data);
+    //     });
+    // }).catch(err => console.log(err));// (err => res.status(500).send(err));
 });
 
 
