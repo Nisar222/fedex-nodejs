@@ -1,5 +1,7 @@
 // var configAuth = require('./../config/auth.js');
 var date = new Date();
+var tomorrow = new Date();
+tomorrow.setDate(tomorrow.getDate() + 3);
 
 module.exports = {
 
@@ -12,7 +14,7 @@ module.exports = {
     'ClientDetail': {
         'AccountNumber': '', //Your Account Number given by FedEx
         'MeterNumber' : '251823183' //Your Meter Number given by FedEx
-    },
+    },    
     'TransactionDetail': {
         'CustomerTransactionId': '', //Your Unique Transactional ID
     },
@@ -24,7 +26,7 @@ module.exports = {
     },
     'ReturnTransitAndCommit': true,
     'RequestedShipment': {
-        'ShipTimestamp': new Date(date.getTime() + (24*60*60*1000)).toISOString(),
+        'ShipTimestamp': new Date(tomorrow.getTime() + (24*60*60*1000)).toISOString(),
         'DropoffType': 'REGULAR_PICKUP',
         'ServiceType': 'INTERNATIONAL_PRIORITY',
         'PackagingType': 'YOUR_PACKAGING',

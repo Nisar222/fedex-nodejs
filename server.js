@@ -4,7 +4,6 @@ var path = require('path');
 var port = process.env.PORT || 8080;
 var captureRequest = '';
 var fs = require('fs');
-var outputvalues = '';
 
 var soap = require('soap');
 
@@ -15,7 +14,7 @@ const { resolve } = require('path');
 const { rejects } = require('assert');
 const { findIndex } = require('./array.js');
 const { resolveCname } = require('dns');
-var ODPair = { Origin: "AE", Destination: "SA", Origin_City: "Dubai", Dest_City: "Jeddah" };
+var ODPair = arr;
 var service = { IP: "INTERNATIONAL_PRIORITY", IE: "INTERNATIONAL_ECONOMY", IPF: "INTERNATIONAL_PRIORITY_FREIGHT", IEF: "INTERNATIONAL_ECONOMY_FREIGHT" }
 
 app.get('/', function (req, res) {
@@ -54,9 +53,13 @@ app.get('/rates', function (req, res) {
                         if (err) {
                             reject(err);
                         } else if (result.RateReplyDetails) {
+                            item.CommitDate = result.RateReplyDetails[0].CommitDetails[0].CommitTimestamp;
+                            ODPair.CommitDate = result.RateReplyDetails[0].CommitDetails[0].CommitTimestamp;
+                            //console.log(item);
                             resolve(result.RateReplyDetails[0].CommitDetails[0].CommitTimestamp);
                             // console.log(arr);
                             // I need to write to the original Object with teh result
+
                         } else {
                             reject(result);
                         }
@@ -69,14 +72,13 @@ app.get('/rates', function (req, res) {
           
     Promise.allSettled(arrOfPromises).then(allRes => {
         res.send(allRes);
-        allRes.forEach(element => {
-            fs.appendFile('./response.json', JSON.stringify(element.value, null, 2), function (err, data) {
-                if (err) {
-                    return console.log(err);
-                }
-                console.log(data);
-            });           
-        }); 
+        //console.log("Here I AM:" + ODPair);
+        allRes.forEach(element => element.DeliveryCommitment = element.value);
+        fs.appendFile('./response.json', JSON.stringify(ODPair, null, 2), function (err, data) {
+            if (err) {
+                return console.log(err);
+            }
+        });    
     }).catch(err => console.log(err));
     
     // Promise.allSettled(arrOfPromises).then(allRes => {
